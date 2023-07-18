@@ -18,15 +18,18 @@ export const authOptions: NextAuthOptions = {
         })
     ],
     jwt: {
-        encode: ({secret, token}) => {
-            const encodedToken = jsonwebtoken.sign({
+        encode: ({ secret, token }) => {
+            const encodedToken = jsonwebtoken.sign(
+              {
                 ...token,
-                iss: 'grafbase',
-                exp: Math.floor(Date.now() / 1000) + 60 * 60
-            }, secret)
-
-            return encodedToken
-        },
+                iss: "grafbase",
+                exp: Math.floor(Date.now() / 1000) + 60 * 60,
+              },
+              secret
+            );
+            console.log("Encoded Token:", encodedToken);
+            return encodedToken;
+          },
         decode: async ({ secret, token }) => {
             const decodedToken = jsonwebtoken.verify(token!, secret);
             return decodedToken as JWT;
@@ -60,23 +63,18 @@ export const authOptions: NextAuthOptions = {
         },
         async signIn({ user }: {user: AdapterUser | User}) {
 
-            try{
-                //get user if exists
+            try {
                 const userExists = await getUser(user?.email as string) as { user?: UserProfile }
-
-                //if they dont exist, create them
-                if(!userExists.user) {
-                    await createUser(
-                        user.name as string,
-                        user.email as string,
-                        user.image as string)
+                
+                if (!userExists.user) {
+                  await createUser(user.name as string, user.email as string, user.image as string)
                 }
-
-                return true
-            }catch (error: any) {
-                console.log(error)
-                return false
-            }
+        
+                return true;
+              } catch (error: any) {
+                console.log("Error checking if user exists: ", error.message);
+                return false;
+              }
         
         }
     }
